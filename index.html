@@ -445,7 +445,7 @@ function renderDailyFamilies(){
   const famSet=new Set();
   days.forEach(d=>{Object.keys(DAY_FAM_DATA[d]||{}).forEach(f=>famSet.add(f));});
   const fams=[...famSet];
-  const famTots=fams.map(f=>({f,t:days.reduce((s,d)=>s+(DAY_FAM_DATA[d]?.(f)||0),0)})).filter(x=>x.t>0).sort((a,b)=>b.t-a.t);
+  const famTots=fams.map(f=>({f,t:days.reduce((s,d)=>s+((DAY_FAM_DATA[d]&&DAY_FAM_DATA[d][f])||0),0)})).filter(x=>x.t>0).sort((a,b)=>b.t-a.t);
   const grand=famTots.reduce((s,x)=>s+x.t,0);
   noteEl.textContent=mesNombre+' · '+fmtNum(grand)+' kg';
 
@@ -492,7 +492,7 @@ function renderDailyFamilies(){
   });
   tbody+='</tbody>';
   let tfoot='<tfoot><tr><td class="fnm">TOTAL</td>';
-  days.forEach(d=>{const t=fams.reduce((s,f)=>s+(DAY_FAM_DATA[d]?.(f)||0),0);tfoot+=`<td>${fmtNum(t)}</td>`;});
+  days.forEach(d=>{const t=fams.reduce((s,f)=>s+((DAY_FAM_DATA[d]&&DAY_FAM_DATA[d][f])||0),0);tfoot+=`<td>${fmtNum(t)}</td>`;});
   tfoot+=`<td class="tot">${fmtNum(grand)}</td></tr></tfoot>`;
   wrapEl.innerHTML=`<table class="ftbl">${thead}${tbody}${tfoot}</table>`;
 }
