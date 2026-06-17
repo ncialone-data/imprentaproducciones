@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IMPRENTA &middot; Producci&oacute;n</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700&family=Bricolage+Grotesque:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --acc:#7c3aed;
+  --acc-l:#faf5ff;
+  --shadow-acc:rgba(124,58,237,0.35);
+  --shadow-acc-sm:rgba(124,58,237,0.28);
+  --bg:#f0f2f6;
+  --panel:#fff;
+  --tx:#111827;
+  --mut:#6b7280;
+  --mut2:#9ca3af;
+  --line:#e5e7eb;
+  --r:14px;
+  --shadow:0 1px 4px rgba(0,0,0,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--tx);font-family:'Outfit',sans-serif;min-height:100vh;}
+.wrap{max-width:1200px;margin:0 auto;padding:24px 20px;}
+
+/* LOADER */
+.loader{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:1000;transition:opacity .4s;}
+.loader.hidden{opacity:0;pointer-events:none;}
+.loader-inner{text-align:center;}
+.loader-badge{width:76px;height:76px;border-radius:20px;background:var(--acc);color:#fff;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:26px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 8px 28px var(--shadow-acc);}
+.loader-name{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:26px;}
+.loader-text{color:var(--mut);margin-top:8px;font-size:14px;}
+.loader-spinner{width:34px;height:34px;border:3px solid var(--line);border-top-color:var(--acc);border-radius:50%;animation:spin .7s linear infinite;margin:18px auto 0;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.retry-btn{margin-top:16px;padding:9px 22px;border-radius:9px;border:none;background:var(--acc);color:#fff;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;}
+
+/* HEADER */
+header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;}
+.brand{display:flex;align-items:center;gap:16px;}
+.fab-badge{width:54px;height:54px;border-radius:14px;background:var(--acc);color:#fff;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:17px;display:flex;align-items:center;justify-content:center;letter-spacing:-.02em;flex:none;box-shadow:0 4px 14px var(--shadow-acc);}
+.brand h1{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(22px,3.5vw,38px);line-height:.95;letter-spacing:-.03em;}
+.brand .sub{color:var(--mut);font-size:13px;margin-top:6px;display:flex;align-items:center;gap:6px;}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--acc);display:inline-block;}
+
+/* FILTER BAR */
+.cutbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 16px;box-shadow:var(--shadow);}
+.cut-lbl{font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--mut2);white-space:nowrap;font-weight:500;}
+.seg{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px;flex-wrap:wrap;}
+.seg button{font-family:'Outfit',sans-serif;font-size:12.5px;color:var(--mut);background:none;border:none;padding:5px 12px;border-radius:7px;cursor:pointer;transition:.15s;white-space:nowrap;font-weight:500;}
+.seg button:hover{color:var(--tx);background:rgba(0,0,0,.04);}
+.seg button.on{background:var(--acc);color:#fff;font-weight:600;box-shadow:0 2px 8px var(--shadow-acc-sm);}
+.refresh-btn{font-family:'Outfit',sans-serif;font-size:12.5px;font-weight:600;padding:6px 14px;border-radius:9px;border:none;background:var(--acc);color:#fff;cursor:pointer;transition:.2s;white-space:nowrap;margin-left:auto;}
+.refresh-btn:hover{opacity:.85;}
+.refresh-btn:disabled{opacity:.5;cursor:not-allowed;}
+.refresh-btn.success{background:#16a34a;}
+.refresh-btn.error{background:#dc2626;}
+.refresh-status{font-size:11px;color:var(--mut);font-style:italic;white-space:nowrap;}
+
+/* KPI */
+.kpi-row{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;margin-bottom:16px;}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;box-shadow:var(--shadow);position:relative;overflow:hidden;}
+.kpi .k-bar{position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r) var(--r) 0 0;background:var(--acc);}
+.kpi .k-bar.red{background:#dc2626;}
+.kpi .k-lbl{font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--mut2);font-weight:500;}
+.kpi .k-val{font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:clamp(20px,2.5vw,30px);margin-top:8px;letter-spacing:-.02em;color:var(--acc);}
+.kpi.red-kpi .k-val{color:#dc2626;}
+.kpi .k-unit{font-size:15px;font-weight:500;}
+.kpi .k-sub{font-size:12px;color:var(--mut);margin-top:5px;}
+.kpi .k-delta{font-size:12px;margin-top:4px;font-weight:600;}
+.k-delta.up{color:#16a34a;}.k-delta.dn{color:#dc2626;}
+
+/* CHART CARD */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;box-shadow:var(--shadow);margin-bottom:16px;overflow:hidden;}
+.c-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;}
+.c-title{font-family:'Outfit',sans-serif;font-weight:700;font-size:14.5px;}
+.c-note{font-size:12px;color:var(--mut);}
+.chart-scroll{overflow-x:auto;}
+svg text{font-family:'IBM Plex Mono',monospace;}
+.gridln{stroke:var(--line);stroke-width:1;}
+.axn{font-size:10px;fill:var(--mut2);}
+.axn-y{text-anchor:end;}
+
+/* FAMILY TABLE */
+.fam-scroll{overflow-x:auto;}
+table.ftbl{width:100%;border-collapse:collapse;font-size:13px;}
+.ftbl th{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut2);font-weight:500;padding:7px 10px;text-align:right;border-bottom:2px solid var(--line);white-space:nowrap;}
+.ftbl th.fnm{text-align:left;}
+.ftbl td{padding:8px 10px;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:12.5px;border-bottom:1px solid var(--line);}
+.ftbl td.fnm{font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;text-align:left;color:var(--tx);}
+.ftbl td.v-pos{color:var(--tx);font-weight:500;}.ftbl td.zero{color:var(--mut2);}
+.ftbl td.tot{color:var(--acc);font-weight:700;border-left:1px solid var(--line);}
+.ftbl tfoot td{color:var(--mut);font-weight:700;border-top:2px solid var(--line);border-bottom:none;}
+.ftbl tfoot td.tot{color:var(--acc);}
+.fam-row.expandable{cursor:pointer;}
+.fam-row.expandable:hover td{background:var(--bg);}
+.exp-icon{display:inline-block;font-size:9px;color:var(--mut2);margin-right:6px;transition:transform .15s;vertical-align:middle;}
+.exp-icon.open{transform:rotate(90deg);color:var(--acc);}
+.code-detail-row td{padding:0;}
+.code-subtable{width:100%;border-collapse:collapse;}
+.code-subtable tr{border-bottom:1px solid rgba(0,0,0,.04);}
+.code-subtable tr:last-child td{border-bottom:none;}
+.code-subtable tr:hover td{background:rgba(0,0,0,.02);}
+.code-subtable td{padding:6px 7px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--mut);text-align:right;background:#f9fafb;}
+.code-subtable td.code-nm{text-align:left;font-family:'Outfit',sans-serif;font-size:11.5px;color:var(--tx);padding-left:32px;white-space:normal;min-width:180px;}
+.code-subtable td.tot{color:var(--acc);font-weight:700;border-left:1px solid var(--line);}
+.code-subtable td.v-pos{color:var(--tx);font-weight:500;}.code-subtable td.zero{color:var(--mut2);}
+.code-tag{font-family:'IBM Plex Mono',monospace;font-size:10px;background:var(--line);padding:2px 5px;border-radius:4px;color:var(--mut);margin-right:7px;white-space:nowrap;}
+
+/* TOOLTIP */
+.tip{position:fixed;background:#1e2937;color:#fff;border-radius:9px;padding:10px 13px;font-size:12.5px;pointer-events:none;opacity:0;transition:opacity .12s;z-index:999;min-width:150px;box-shadow:0 8px 24px rgba(0,0,0,.2);}
+.t-head{font-weight:700;margin-bottom:6px;font-family:'Outfit';font-size:13px;}
+.t-row{display:flex;justify-content:space-between;gap:20px;margin-top:3px;}
+.t-nm{color:rgba(255,255,255,.65);}
+.t-v{font-family:'IBM Plex Mono',monospace;font-weight:600;}
+
+@media(max-width:700px){.kpi-row{grid-template-columns:1fr 1fr;}.kpi-row .kpi:first-child{grid-column:1/-1;}}
+@media(max-width:500px){.kpi-row{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div id="loader" class="loader">
+  <div class="loader-inner">
+    <div class="loader-badge">IMP</div>
+    <div class="loader-name">IMPRENTA</div>
+    <div class="loader-text">Cargando datos...</div>
+    <div class="loader-spinner"></div>
+  </div>
+</div>
+
+<div class="wrap" id="main" style="display:none">
+  <header>
+    <div class="brand">
+      <div class="fab-badge">IMP</div>
+      <div>
+        <h1>IMPRENTA</h1>
+        <div class="sub"><span class="dot"></span><span>Producci&oacute;n &middot; <span id="periodoLbl">2024&ndash;2026</span></span></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="cutbar">
+    <span class="cut-lbl">A&ntilde;o</span>
+    <div class="seg" id="yearSeg"></div>
+    <span class="cut-lbl">Per&iacute;odo</span>
+    <div class="seg" id="mesSeg"></div>
+    <button class="refresh-btn" id="refreshBtn" onclick="refreshFromCSV()">&#8635; Actualizar</button>
+    <span class="refresh-status" id="refreshStatus"></span>
+  </div>
+
+  <div class="kpi-row" id="kpiRow"></div>
+
+  <div class="card">
+    <div class="c-head">
+      <span class="c-title">Producci&oacute;n mensual</span>
+      <span class="c-note" id="chartNote">Kilos por mes</span>
+    </div>
+    <div class="chart-scroll"><div id="chartWrap"></div></div>
+  </div>
+
+  <div class="card">
+    <div class="c-head">
+      <span class="c-title">Ingreso mensual x familia</span>
+      <span class="c-note" id="famNote"></span>
+    </div>
+    <div class="fam-scroll"><div id="famWrap"></div></div>
+  </div>
+
+  <div class="card">
+    <div class="c-head">
+      <span class="c-title">Ingreso diario x familia</span>
+      <span class="c-note" id="dailyFamNote"></span>
+    </div>
+    <div class="fam-scroll"><div id="dailyFamWrap"></div></div>
+  </div>
+</div>
+
+<div class="tip" id="tip"></div>
+
+<script>
+/* CAMBIO 1: URL de Google Sheets para IMPRENTA */
+const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vSHeQ6byhXx1kd9hGG3lzIDCKZgbJc8FeLXvj_5HZkm_sWzMOHkxcctyNpQuoXNk25yceOwgANfJ23Y/pub?gid=0&single=true&output=csv';
+const FAB='IMPRENTA';
+const FAB_COLOR='#7c3aed';
+const FAB_METRIC='kg';
+const FAB_METRIC_LABEL='Kilos';
+const HAS_SCRAP=false;
+
+const MES_ES=["","Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+const MES_FULL=["","Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+function mlbl(ym){if(!ym)return'';const[y,m]=ym.split('-');return MES_ES[+m]+" '"+y.slice(2);}
+
+let state={year:'',mes:''};
+let DATA={};
+let FAM_DATA={};
+let CODE_DATA={};
+let ALL_MONTHS=[];
+let YEAR_MONTHS={};
+/* CAMBIO 7c: variables globales para datos diarios */
+let DAY_FAM_DATA={};  /* {ymd:{fam:val}} */
+let DAY_CODE_DATA={}; /* {ymd:{fam:[{c,n,v}]}} */
+
+/* ===== HELPERS ===== */
+function fmtNum(v){return Math.round(v).toLocaleString('es-AR');}
+function fmtShort(v){if(v>=1000000)return(v/1000000).toFixed(1)+'M';if(v>=1000)return Math.round(v/1000)+'K';return Math.round(v).toString();}
+function getFilteredMonths(){
+  if(state.year){const ym=YEAR_MONTHS[state.year]||[];return state.mes?(ym.includes(state.mes)?[state.mes]:[]):ym;}
+  return state.mes?[state.mes]:ALL_MONTHS;
+}
+/* CAMBIO 4: función para obtener meses del gráfico (siempre año completo) */
+function getChartMonths(){
+  const cy=state.year||new Date().getFullYear().toString();
+  return YEAR_MONTHS[cy]||ALL_MONTHS;
+}
+function getVal(ym){const d=DATA[ym];if(!d)return 0;return FAB_METRIC==='u'?d.u:d.kg;}
+function getScrap(ym){return(DATA[ym]||{}).sc||0;}
+function getTot(months){return months.reduce((s,m)=>s+getVal(m),0);}
+function getScrapTot(months){return months.reduce((s,m)=>s+getScrap(m),0);}
+function getKgTot(months){return months.reduce((s,m)=>s+((DATA[m]||{}).kg||0),0);}
+
+function getPrevPeriod(months){
+  if(!months.length)return[];
+  const n=months.length;
+  const[y,m]=months[0].split('-').map(Number);
+  const res=[];
+  for(let i=0;i<n;i++){let ry=y,rm=m-n+i;while(rm<=0){rm+=12;ry--;}res.push(`${ry}-${String(rm).padStart(2,'0')}`);}
+  return res.filter(x=>ALL_MONTHS.includes(x));
+}
+
+/* ===== RENDER ===== */
+function render(){
+  buildYearSeg();
+  buildMonthSeg();
+  renderKPIs();
+  renderChart();
+  renderFamilies();
+  renderDailyFamilies();
+  const ys=Object.keys(YEAR_MONTHS).sort();
+  document.getElementById('periodoLbl').textContent=state.year||(ys.length?(ys[0]+'–'+ys[ys.length-1]):'2024–2026');
+}
+
+function buildYearSeg(){
+  const years=Object.keys(YEAR_MONTHS).sort();
+  const seg=document.getElementById('yearSeg');
+  seg.innerHTML='<button data-y="" class="'+(state.year?'':'on')+'">Todos</button>'+
+    years.map(y=>'<button data-y="'+y+'" class="'+(state.year===y?'on':'')+'" >'+y+'</button>').join('');
+  seg.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{state.year=b.dataset.y;state.mes='';render();}));
+}
+
+function buildMonthSeg(){
+  const months=state.year?(YEAR_MONTHS[state.year]||[]):ALL_MONTHS;
+  const seg=document.getElementById('mesSeg');
+  let html='<button data-ms="" class="'+(state.mes?'':'on')+'">Todo</button>';
+  months.forEach(m=>{
+    const[y,mo]=m.split('-');
+    const lbl=MES_ES[+mo]+(state.year===''?" '"+y.slice(2):'');
+    html+='<button data-ms="'+m+'" class="'+(state.mes===m?'on':'')+'" >'+lbl+'</button>';
+  });
+  seg.innerHTML=html;
+  seg.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{state.mes=b.dataset.ms;render();}));
+}
+
+function renderKPIs(){
+  const months=getFilteredMonths();
+  const tot=getTot(months);
+  const sc=HAS_SCRAP?getScrapTot(months):0;
+
+  /* CAMBIO 3: mejor mes siempre del año activo, no del filtro de mes */
+  const activeYear=state.year||new Date().getFullYear().toString();
+  const yearMonths=YEAR_MONTHS[activeYear]||ALL_MONTHS;
+  const bm=yearMonths.length?yearMonths.reduce((b,m)=>getVal(m)>getVal(b)?m:b,yearMonths[0]):'';
+
+  const prevM=getPrevPeriod(months);
+  const prevT=prevM.reduce((s,m)=>s+getVal(m),0);
+  let deltaHtml='';
+  if(prevT>0){
+    const p=(tot-prevT)/prevT*100;
+    const lbl=months.length===1?'vs mes anterior':'vs período anterior';
+    deltaHtml=`<div class="k-delta ${p>=0?'up':'dn'}">${p>=0?'&#9650;':'&#9660;'} ${Math.abs(p).toFixed(1)}% ${lbl}</div>`;
+  }
+  const subLbl=!months.length?'Sin datos':months.length===1?mlbl(months[0]):
+    months.length+' meses · '+mlbl(months[0])+' – '+mlbl(months[months.length-1]);
+  const unit=FAB_METRIC==='u'?'u':'kg';
+
+  let kpis=`<div class="kpi">
+    <div class="k-bar"></div>
+    <div class="k-lbl">Total · ${FAB_METRIC_LABEL}</div>
+    <div class="k-val">${fmtNum(tot)} <span class="k-unit">${unit}</span></div>
+    <div class="k-sub">${subLbl}</div>
+    ${deltaHtml}
+  </div>`;
+
+  if(HAS_SCRAP){
+    const scPct=tot>0?(sc/(tot+sc)*100).toFixed(1):'0.0';
+    kpis+=`<div class="kpi red-kpi">
+      <div class="k-bar red"></div>
+      <div class="k-lbl">Scrap</div>
+      <div class="k-val">${fmtNum(sc)} <span class="k-unit">kg</span></div>
+      <div class="k-sub">${scPct}% de producción</div>
+    </div>`;
+  } else if(FAB_METRIC==='u'){
+    const totKg=getKgTot(months);
+    kpis+=`<div class="kpi">
+      <div class="k-bar"></div>
+      <div class="k-lbl">Total · Kilos</div>
+      <div class="k-val">${fmtNum(totKg)} <span class="k-unit">kg</span></div>
+      <div class="k-sub">Equivalente en kg</div>
+    </div>`;
+  } else {
+    /* CAMBIO 3: etiqueta incluye el año activo */
+    kpis+=`<div class="kpi">
+      <div class="k-bar"></div>
+      <div class="k-lbl">Mejor mes · ${activeYear}</div>
+      <div class="k-val" style="font-size:clamp(14px,1.8vw,22px)">${bm?mlbl(bm):'&mdash;'}</div>
+      <div class="k-sub">${bm?fmtNum(getVal(bm))+' kg':''}</div>
+    </div>`;
+  }
+
+  kpis+=`<div class="kpi">
+    <div class="k-bar"></div>
+    <div class="k-lbl">Mejor mes · ${activeYear}</div>
+    <div class="k-val" style="font-size:clamp(14px,1.8vw,22px)">${bm?mlbl(bm):'&mdash;'}</div>
+    <div class="k-sub">${bm?fmtNum(getVal(bm))+' '+unit:''}</div>
+  </div>`;
+
+  document.getElementById('kpiRow').innerHTML=kpis;
+}
+
+function renderChart(){
+  /* CAMBIO 4: usar getChartMonths() en lugar de getFilteredMonths() */
+  const months=getChartMonths();
+  if(!months.length){
+    document.getElementById('chartWrap').innerHTML='<p style="color:var(--mut);padding:16px 0">Sin datos para el período seleccionado.</p>';
+    return;
+  }
+  const W=900,H=270,PL=60,PR=16,PT=12,PB=40;
+  const cW=W-PL-PR,cH=H-PT-PB;
+  const barW=Math.min(Math.floor(cW/months.length)-4,44);
+  const vals=months.map(m=>getVal(m));
+  const scraps=HAS_SCRAP?months.map(m=>getScrap(m)):[];
+  const combined=HAS_SCRAP?months.map((_,i)=>vals[i]+scraps[i]):vals;
+  const maxV=Math.max(...combined,1);
+  const xC=i=>PL+i*(cW/months.length)+cW/months.length/2;
+  const yP=v=>PT+cH*(1-v/maxV);
+  let grid='',yLbls='',bars='';
+  for(let i=0;i<=5;i++){const v=maxV*i/5,y=yP(v).toFixed(1);grid+=`<line class="gridln" x1="${PL}" x2="${W-PR}" y1="${y}" y2="${y}"/>`;yLbls+=`<text class="axn axn-y" x="${PL-5}" y="${(+y+3).toFixed(1)}">${fmtShort(v)}</text>`;}
+  const step=months.length>18?2:1;
+  months.forEach((m,i)=>{
+    const v=getVal(m),sc=HAS_SCRAP?getScrap(m):0;
+    const cx=xC(i).toFixed(1),bx=(xC(i)-barW/2).toFixed(1);
+    const bh=Math.max((v/maxV)*cH,1).toFixed(1),by=yP(v).toFixed(1);
+    /* CAMBIO 4: resaltar barra del mes seleccionado, atenuar las demás */
+    const isSelected=state.mes&&state.mes===m;
+    const isOther=state.mes&&state.mes!==m;
+    const opacity=isOther?'.3':(isSelected?'1':'.85');
+    const stroke=isSelected?`stroke="${FAB_COLOR}" stroke-width="2"`:'';
+    bars+=`<rect x="${bx}" y="${by}" width="${barW}" height="${bh}" fill="${FAB_COLOR}" opacity="${opacity}" rx="3" class="bar" data-m="${m}" data-v="${v}" data-sc="${sc}" style="cursor:pointer" ${stroke}/>`;
+    if(HAS_SCRAP&&sc>0){const sh=Math.max((sc/maxV)*cH,1).toFixed(1),sy=(+by-+sh).toFixed(1);bars+=`<rect x="${bx}" y="${sy}" width="${barW}" height="${sh}" fill="#dc2626" opacity=".5" rx="2"/>`;}
+    if(i%step===0)bars+=`<text class="axn" x="${cx}" y="${(H-8)}" text-anchor="middle">${mlbl(m)}</text>`;
+  });
+  document.getElementById('chartNote').textContent=FAB_METRIC_LABEL+' por mes';
+  document.getElementById('chartWrap').innerHTML=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;min-width:480px">${grid}${yLbls}${bars}</svg>`;
+  document.querySelectorAll('#chartWrap .bar').forEach(el=>{
+    el.addEventListener('mouseenter',e=>{
+      const m=el.dataset.m,v=+el.dataset.v,sc=+el.dataset.sc;
+      let h=`<div class="t-head">${mlbl(m)}</div><div class="t-row"><span class="t-nm">${FAB_METRIC_LABEL}</span><span class="t-v">${fmtNum(v)} ${FAB_METRIC==='u'?'u':'kg'}</span></div>`;
+      if(HAS_SCRAP&&sc>0)h+=`<div class="t-row"><span class="t-nm" style="color:#f87171">Scrap</span><span class="t-v" style="color:#f87171">${fmtNum(sc)} kg</span></div>`;
+      showTip(e,h);
+    });
+    el.addEventListener('mousemove',moveTip);
+    el.addEventListener('mouseleave',hideTip);
+  });
+}
+
+function renderFamilies(){
+  /* CAMBIO 6: usar getChartMonths() para que no cambie al filtrar mes */
+  const months=getChartMonths();
+  const unit=FAB_METRIC==='u'?'u':'kg';
+  const fams=Object.keys(FAM_DATA);
+  const famTots=fams.map(f=>({f,t:months.reduce((s,m)=>s+(FAM_DATA[f][m]||0),0)})).filter(x=>x.t>0).sort((a,b)=>b.t-a.t);
+  const grand=famTots.reduce((s,x)=>s+x.t,0);
+  document.getElementById('famNote').textContent=fmtNum(grand)+' '+unit;
+  if(!famTots.length){document.getElementById('famWrap').innerHTML='<p style="color:var(--mut);padding:8px 0">Sin datos.</p>';return;}
+  let uid=0;
+  const thead=`<thead><tr><th class="fnm">Familia</th>${months.map(m=>`<th>${mlbl(m)}</th>`).join('')}<th>Total</th></tr></thead>`;
+  let tbody='<tbody>';
+  famTots.forEach(({f,t})=>{
+    const id='fc'+(uid++);
+    const codes=(CODE_DATA[f]||[]).filter(item=>months.some(m=>(item.d[m]||0)>0));
+    const hasD=codes.length>0;
+    tbody+=`<tr class="fam-row${hasD?' expandable':''}" ${hasD?`onclick="toggleCodes('${id}')"`:''}><td class="fnm">${hasD?`<span class="exp-icon" id="${id}_ic">&#9658;</span>`:''}<span>${f}</span></td>`;
+    months.forEach(m=>{const v=FAM_DATA[f][m]||0;tbody+=`<td class="${v>0?'v-pos':'zero'}">${v>0?fmtNum(v):'&mdash;'}</td>`;});
+    tbody+=`<td class="tot">${fmtNum(t)}</td></tr>`;
+    if(hasD){
+      const sorted=[...codes].sort((a,b)=>months.reduce((s,m)=>s+(b.d[m]||0),0)-months.reduce((s,m)=>s+(a.d[m]||0),0));
+      let sub='';
+      sorted.forEach(item=>{
+        const ct=months.reduce((s,m)=>s+(item.d[m]||0),0);
+        sub+=`<tr><td class="code-nm"><span class="code-tag">${item.c}</span>${item.n}</td>`;
+        months.forEach(m=>{const v=item.d[m]||0;sub+=`<td class="${v>0?'v-pos':'zero'}">${v>0?fmtNum(v):'&mdash;'}</td>`;});
+        sub+=`<td class="tot">${fmtNum(ct)}</td></tr>`;
+      });
+      tbody+=`<tr id="${id}" class="code-detail-row" style="display:none"><td colspan="${months.length+2}" style="padding:0"><table class="code-subtable">${sub}</table></td></tr>`;
+    }
+  });
+  tbody+='</tbody>';
+  let tfoot='<tfoot><tr><td class="fnm">TOTAL</td>';
+  months.forEach(m=>{const t=fams.reduce((s,f)=>s+(FAM_DATA[f][m]||0),0);tfoot+=`<td>${fmtNum(t)}</td>`;});
+  tfoot+=`<td class="tot">${fmtNum(grand)}</td></tr></tfoot>`;
+  document.getElementById('famWrap').innerHTML=`<table class="ftbl">${thead}${tbody}${tfoot}</table>`;
+}
+
+/* CAMBIO 7e: función que retorna el mes a mostrar en la tabla diaria */
+function getDailyMonth(){
+  if(state.mes)return state.mes;
+  const now=new Date();
+  const cym=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  if(ALL_MONTHS.includes(cym))return cym;
+  return ALL_MONTHS[ALL_MONTHS.length-1]||'';
+}
+
+/* CAMBIO 7f: renderizar tabla ingreso diario x familia */
+function renderDailyFamilies(){
+  const ym=getDailyMonth();
+  const noteEl=document.getElementById('dailyFamNote');
+  const wrapEl=document.getElementById('dailyFamWrap');
+  if(!ym){noteEl.textContent='';wrapEl.innerHTML='<p style="color:var(--mut);padding:8px 0">Sin datos.</p>';return;}
+  const[y,mo]=ym.split('-');
+  const mesNombre=MES_FULL[+mo]+' '+y;
+
+  /* recolectar días que tienen datos para este mes */
+  const daysSet=new Set();
+  Object.keys(DAY_FAM_DATA).forEach(ymd=>{if(ymd.startsWith(ym+'-'))daysSet.add(ymd);});
+  const days=[...daysSet].sort();
+
+  if(!days.length){
+    noteEl.textContent=mesNombre;
+    wrapEl.innerHTML='<p style="color:var(--mut);padding:8px 0">Sin datos diarios para '+mesNombre+'.</p>';
+    return;
+  }
+
+  /* calcular totales por familia */
+  const famSet=new Set();
+  days.forEach(d=>{Object.keys(DAY_FAM_DATA[d]||{}).forEach(f=>famSet.add(f));});
+  const fams=[...famSet];
+  const famTots=fams.map(f=>({f,t:days.reduce((s,d)=>s+(DAY_FAM_DATA[d]?.(f)||0),0)})).filter(x=>x.t>0).sort((a,b)=>b.t-a.t);
+  const grand=famTots.reduce((s,x)=>s+x.t,0);
+  noteEl.textContent=mesNombre+' · '+fmtNum(grand)+' kg';
+
+  const unit=FAB_METRIC==='u'?'u':'kg';
+  /* encabezados: solo día del mes (dd) */
+  const dayLabels=days.map(d=>d.split('-')[2].replace(/^0/,''));
+  const thead=`<thead><tr><th class="fnm">Familia</th>${dayLabels.map(d=>`<th>${d}</th>`).join('')}<th>Total</th></tr></thead>`;
+
+  let uid=0;
+  let tbody='<tbody>';
+  famTots.forEach(({f,t})=>{
+    const id='df'+(uid++);
+    /* códigos con datos diarios en este mes */
+    const codesInMonth=[];
+    if(DAY_CODE_DATA){
+      const codeMap={};
+      days.forEach(d=>{
+        const dayFamCodes=(DAY_CODE_DATA[d]&&DAY_CODE_DATA[d][f])||[];
+        dayFamCodes.forEach(({c,n,v})=>{
+          if(!codeMap[c])codeMap[c]={c,n,d:{}};
+          codeMap[c].d[d]=(codeMap[c].d[d]||0)+v;
+        });
+      });
+      Object.values(codeMap).forEach(item=>{
+        const tot=Object.values(item.d).reduce((s,v)=>s+v,0);
+        if(tot>0)codesInMonth.push({...item,_tot:tot});
+      });
+      codesInMonth.sort((a,b)=>b._tot-a._tot);
+    }
+    const hasD=codesInMonth.length>0;
+    tbody+=`<tr class="fam-row${hasD?' expandable':''}" ${hasD?`onclick="toggleCodes('${id}')"`:''}><td class="fnm">${hasD?`<span class="exp-icon" id="${id}_ic">&#9658;</span>`:''}<span>${f}</span></td>`;
+    days.forEach(d=>{const v=(DAY_FAM_DATA[d]&&DAY_FAM_DATA[d][f])||0;tbody+=`<td class="${v>0?'v-pos':'zero'}">${v>0?fmtNum(v):'&mdash;'}</td>`;});
+    tbody+=`<td class="tot">${fmtNum(t)}</td></tr>`;
+    if(hasD){
+      let sub='';
+      codesInMonth.forEach(item=>{
+        const ct=Object.values(item.d).reduce((s,v)=>s+v,0);
+        sub+=`<tr><td class="code-nm"><span class="code-tag">${item.c}</span>${item.n}</td>`;
+        days.forEach(d=>{const v=item.d[d]||0;sub+=`<td class="${v>0?'v-pos':'zero'}">${v>0?fmtNum(v):'&mdash;'}</td>`;});
+        sub+=`<td class="tot">${fmtNum(ct)}</td></tr>`;
+      });
+      tbody+=`<tr id="${id}" class="code-detail-row" style="display:none"><td colspan="${days.length+2}" style="padding:0"><table class="code-subtable">${sub}</table></td></tr>`;
+    }
+  });
+  tbody+='</tbody>';
+  let tfoot='<tfoot><tr><td class="fnm">TOTAL</td>';
+  days.forEach(d=>{const t=fams.reduce((s,f)=>s+(DAY_FAM_DATA[d]?.(f)||0),0);tfoot+=`<td>${fmtNum(t)}</td>`;});
+  tfoot+=`<td class="tot">${fmtNum(grand)}</td></tr></tfoot>`;
+  wrapEl.innerHTML=`<table class="ftbl">${thead}${tbody}${tfoot}</table>`;
+}
+
+function toggleCodes(id){
+  const row=document.getElementById(id);if(!row)return;
+  const ic=document.getElementById(id+'_ic');
+  const open=row.style.display!=='none';
+  row.style.display=open?'none':'table-row';
+  if(ic)ic.classList.toggle('open',!open);
+}
+
+/* ===== TOOLTIP ===== */
+const tip=document.getElementById('tip');
+function showTip(e,h){tip.innerHTML=h;tip.style.opacity=1;moveTip(e);}
+function moveTip(e){tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY-14)+'px';}
+function hideTip(){tip.style.opacity=0;}
+
+/* ===== CSV PARSING ===== */
+function parseCSVLine(line){
+  const res=[];let cur='',inQ=false;
+  for(let i=0;i<line.length;i++){
+    if(line[i]==='"'){inQ=!inQ;}else if(line[i]===','&&!inQ){res.push(cur);cur='';}else cur+=line[i];
+  }
+  res.push(cur);return res;
+}
+
+/* CAMBIO 7a: parseDateFull retorna YYYY-MM-DD */
+function parseDateFull(str){
+  if(!str||!str.trim())return null;
+  str=str.trim();
+  if(/^\d{4}-\d{2}-\d{2}/.test(str))return str.substring(0,10);
+  const p=str.split('/');
+  if(p.length===3){
+    const a=parseInt(p[0]),b=parseInt(p[1]),y=parseInt(p[2]);
+    if(y>2000){
+      let dd,mm;
+      if(a>12){dd=a;mm=b;}else if(b>12){dd=b;mm=a;}else{dd=a;mm=b;}
+      return y+'-'+String(mm).padStart(2,'0')+'-'+String(dd).padStart(2,'0');
+    }
+  }
+  return null;
+}
+
+/* CAMBIO 7b: parseDateYM derivada de parseDateFull */
+function parseDateYM(str){
+  const full=parseDateFull(str);
+  return full?full.substring(0,7):null;
+}
+
+/* ===== PROCESS CSV ===== */
+function processCSVData(csvText){
+  const lines=csvText.trim().split('\n');
+  const hdr=parseCSVLine(lines[0]).map(h=>h.trim());
+  const iF=hdr.indexOf('FECHA'),iPV=hdr.indexOf('PROVEEDOR'),
+        iCO=hdr.indexOf('CODIGO'),iMP=hdr.indexOf('MATERIA PRIMA'),
+        iFM=hdr.indexOf('FAMILIA'),iGR=hdr.indexOf('GRUPO'),
+        iTK=hdr.indexOf('TOTAL KILOS'),iPD=hdr.indexOf('PEDIDO');
+
+  const PROV_MAP={'BARMAN':'BARMAN','VYMAT SRL':'VYMAT','FABRICA DE TUBOS':'FABRICA DE TUBOS','TUBOS':'FABRICA DE TUBOS','RESIMAX':'BARMAN','IMPRENTA':'IMPRENTA'};
+  const IMP_FAM=new Set(['MANTELES','MANTELES BURGER','MANTEL GENERICO','SULFITO CORTADO']);
+  const IMP_REMAP={'MANTELES BURGER':'MANTELES','MANTEL GENERICO':'MANTELES'};
+  const VYMAT_REMAP={'VYMAT ROLLOS - MAQUINA AUTOMATICA':'VYMAT ROLLOS - MÁQ. AUTOMÁTICA','VYMAT ROLLOS - MAQUINA ANIMAL':'VYMAT ROLLOS - MÁQ. ANIMAL'};
+
+  const rows=[];
+  for(let i=1;i<lines.length;i++){
+    const v=parseCSVLine(lines[i]);if(v.length<4)continue;
+    const ymd=parseDateFull(v[iF]);if(!ymd)continue;
+    const ym=ymd.substring(0,7);
+    const prov=(v[iPV]||'').trim().toUpperCase();
+    const famRaw=(v[iFM]||'').trim().toUpperCase();
+    let fab=PROV_MAP[prov]||null;
+    if(IMP_FAM.has(famRaw))fab='IMPRENTA';
+    if(fab!==FAB)continue;
+    const kg=parseFloat((v[iTK]||'0').replace(',','.'))||0;
+    const u=parseFloat((v[iPD]||'0').replace(',','.'))||0;
+    const isScrap=(v[iGR]||'').trim().toUpperCase()==='SCRAP FABRICAS';
+    let fam=famRaw;
+    if(FAB==='IMPRENTA')fam=IMP_REMAP[fam]||fam;
+    if(FAB==='VYMAT')fam=VYMAT_REMAP[fam]||fam;
+    rows.push({ymd,ym,fam,cod:(v[iCO]||'').trim(),nom:(v[iMP]||'').trim(),kg,u,isScrap});
+  }
+
+  const monthSet=new Set(rows.map(r=>r.ym));
+  ALL_MONTHS=[...monthSet].sort();
+  YEAR_MONTHS={};
+  ALL_MONTHS.forEach(m=>{const y=m.substring(0,4);(YEAR_MONTHS[y]=YEAR_MONTHS[y]||[]).push(m);});
+
+  DATA={};
+  rows.forEach(r=>{
+    if(!DATA[r.ym])DATA[r.ym]={kg:0,u:0,sc:0};
+    if(r.isScrap)DATA[r.ym].sc+=r.kg;
+    else{DATA[r.ym].kg+=r.kg;DATA[r.ym].u+=r.u;}
+  });
+  Object.keys(DATA).forEach(ym=>{DATA[ym].kg=Math.round(DATA[ym].kg);DATA[ym].u=Math.round(DATA[ym].u);DATA[ym].sc=Math.round(DATA[ym].sc);});
+
+  FAM_DATA={};
+  const prod=rows.filter(r=>!r.isScrap);
+  prod.forEach(r=>{
+    if(!r.fam)return;
+    if(!FAM_DATA[r.fam])FAM_DATA[r.fam]={};
+    const val=FAB_METRIC==='u'?r.u:r.kg;
+    FAM_DATA[r.fam][r.ym]=(FAM_DATA[r.fam][r.ym]||0)+val;
+  });
+  Object.keys(FAM_DATA).forEach(f=>Object.keys(FAM_DATA[f]).forEach(ym=>{FAM_DATA[f][ym]=Math.round(FAM_DATA[f][ym]);}));
+
+  CODE_DATA={};
+  const famMap={};
+  prod.forEach(r=>{
+    if(!r.fam||!r.cod)return;
+    if(!famMap[r.fam])famMap[r.fam]={};
+    const key=r.cod+'|'+r.nom;
+    if(!famMap[r.fam][key])famMap[r.fam][key]={c:r.cod,n:r.nom,d:{}};
+    const val=FAB_METRIC==='u'?r.u:r.kg;
+    famMap[r.fam][key].d[r.ym]=(famMap[r.fam][key].d[r.ym]||0)+val;
+  });
+  Object.keys(famMap).forEach(fam=>{
+    const codes=Object.values(famMap[fam]).map(item=>{
+      const d={};
+      Object.keys(item.d).forEach(ym=>{if(item.d[ym]>0)d[ym]=Math.round(item.d[ym]);});
+      return{c:item.c,n:item.n,d,_tot:Object.values(d).reduce((s,v)=>s+v,0)};
+    }).filter(x=>x._tot>0).sort((a,b)=>b._tot-a._tot).slice(0,30).map(({c,n,d})=>({c,n,d}));
+    if(codes.length)CODE_DATA[fam]=codes;
+  });
+
+  /* CAMBIO 7d: poblar DAY_FAM_DATA y DAY_CODE_DATA */
+  DAY_FAM_DATA={};
+  DAY_CODE_DATA={};
+  prod.forEach(r=>{
+    if(!r.fam||!r.ymd)return;
+    const val=FAB_METRIC==='u'?r.u:r.kg;
+    if(!DAY_FAM_DATA[r.ymd])DAY_FAM_DATA[r.ymd]={};
+    DAY_FAM_DATA[r.ymd][r.fam]=(DAY_FAM_DATA[r.ymd][r.fam]||0)+val;
+    if(!DAY_CODE_DATA[r.ymd])DAY_CODE_DATA[r.ymd]={};
+    if(!DAY_CODE_DATA[r.ymd][r.fam])DAY_CODE_DATA[r.ymd][r.fam]=[];
+    const existing=DAY_CODE_DATA[r.ymd][r.fam].find(x=>x.c===r.cod&&x.n===r.nom);
+    if(existing)existing.v+=val;
+    else DAY_CODE_DATA[r.ymd][r.fam].push({c:r.cod,n:r.nom,v:val});
+  });
+  /* redondear */
+  Object.keys(DAY_FAM_DATA).forEach(d=>Object.keys(DAY_FAM_DATA[d]).forEach(f=>{DAY_FAM_DATA[d][f]=Math.round(DAY_FAM_DATA[d][f]);}));
+  Object.keys(DAY_CODE_DATA).forEach(d=>Object.keys(DAY_CODE_DATA[d]).forEach(f=>{DAY_CODE_DATA[d][f].forEach(x=>{x.v=Math.round(x.v);});}));
+
+  /* CAMBIO 9: retornar objeto con total y fab */
+  return{total:lines.length-1,fab:rows.length};
+}
+
+/* ===== LOAD & REFRESH ===== */
+async function loadData(isRefresh){
+  const btn=document.getElementById('refreshBtn');
+  const status=document.getElementById('refreshStatus');
+  /* CAMBIO 8: usar innerHTML para que los caracteres HTML se rendericen */
+  if(isRefresh){btn.innerHTML='&#8635; Obteniendo...';btn.className='refresh-btn';btn.disabled=true;status.textContent='';}
+  try{
+    const resp=await fetch(CSV_URL);
+    if(!resp.ok)throw new Error('HTTP '+resp.status);
+    const text=await resp.text();
+    /* CAMBIO 9: desestructurar resultado */
+    const{total,fab}=processCSVData(text);
+    document.getElementById('loader').classList.add('hidden');
+    document.getElementById('main').style.display='';
+
+    /* CAMBIO 2: establecer año y mes actual por defecto */
+    const now=new Date();
+    const cy=now.getFullYear().toString();
+    const cym=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+    state.year=YEAR_MONTHS[cy]?cy:'';
+    state.mes=ALL_MONTHS.includes(cym)?cym:(ALL_MONTHS[ALL_MONTHS.length-1]||'');
+
+    render();
+    if(isRefresh){
+      /* CAMBIO 8: innerHTML para &#10003; */
+      btn.innerHTML='&#10003; Actualizado';btn.className='refresh-btn success';
+      /* CAMBIO 9: mostrar total y fab en el estado */
+      status.textContent=new Date().toLocaleTimeString('es-AR')+' · '+fab.toLocaleString('es-AR')+' reg. IMPRENTA ('+total.toLocaleString('es-AR')+' totales)';
+      setTimeout(()=>{btn.innerHTML='&#8635; Actualizar';btn.className='refresh-btn';btn.disabled=false;status.textContent='';},3000);
+    }
+  }catch(err){
+    if(isRefresh){
+      /* CAMBIO 8: innerHTML para &#10007; */
+      btn.innerHTML='&#10007; Error';btn.className='refresh-btn error';
+      status.textContent=err.message;btn.disabled=false;
+    }else{
+      document.getElementById('loader').innerHTML=`<div class="loader-inner"><div class="loader-badge" style="background:${FAB_COLOR}">IMP</div><div class="loader-name">IMPRENTA</div><div class="loader-text" style="color:#dc2626">Error al cargar datos</div><button class="retry-btn" onclick="loadData(false)">Reintentar</button></div>`;
+    }
+    console.error(err);
+  }
+}
+function refreshFromCSV(){loadData(true);}
+loadData(false);
+</script>
+</body>
+</html>
